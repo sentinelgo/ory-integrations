@@ -9,7 +9,7 @@ const bundle = (config) => ({
 const modules = ["ui", "routes", "next-edge", "next", "next-edge-app"]
   .map((module) => [
     bundle({
-      plugins: [esbuild()],
+      plugins: [esbuild({ exclude: /dist/ })],
       input: `src/${module}/index.ts`,
       output: [
         {
