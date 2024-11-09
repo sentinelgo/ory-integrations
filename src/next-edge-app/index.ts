@@ -136,11 +136,12 @@ export function guessCookieDomain(
   return parsed.domain
 }
 
-export function filterRequestHeaders(
+export async  function filterRequestHeaders(
   forwardAdditionalHeaders?: string[],
-): Headers {
+) {
   const filteredHeaders = new Headers()
-  headers().forEach((value, key) => {
+  const h = await headers();
+  h.forEach((value, key) => {
     const isValid =
       defaultForwardedHeaders.includes(key) ||
       (forwardAdditionalHeaders ?? []).includes(key)
@@ -150,12 +151,12 @@ export function filterRequestHeaders(
   return filteredHeaders
 }
 
-function processSetCookieHeader(
+async function processSetCookieHeader(
   protocol: string,
   fetchResponse: Response,
   options: CreateApiHandlerOptions,
 ) {
-  const requestHeaders = headers()
+  const requestHeaders = await headers()
   const isTls =
     protocol === "https:" || requestHeaders.get("x-forwarded-proto") === "https"
 
@@ -198,7 +199,7 @@ export function createApiHandler(options: CreateApiHandlerOptions) {
       redirect("../../../")
     }
 
-    const requestHeaders = filterRequestHeaders(
+    const requestHeaders = await filterRequestHeaders(
       options.forwardAdditionalHeaders,
     )
 
@@ -225,7 +226,7 @@ export function createApiHandler(options: CreateApiHandlerOptions) {
       responseHeaders.delete("location")
       responseHeaders.delete("set-cookie")
       if (response.headers.get("set-cookie")) {
-        const cookies = processSetCookieHeader(
+        const cookies = await processSetCookieHeader(
           request.nextUrl.protocol,
           response,
           options,
